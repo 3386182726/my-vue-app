@@ -17,12 +17,12 @@ export function generateMenuFromRoutes(routes = [], allowedPaths = [], basePath 
       // 判断当前菜单是否有权限
       const selfHasAccess =
       allowedPaths.includes(fullPath) || allowedPaths.includes(r.path.replace('/',''))
-      console.log('selfHasAccess',r.path,allowedPaths,allowedPaths.includes(r.path))
+      // console.log('selfHasAccess',r.path,allowedPaths,allowedPaths.includes(r.path))
       // 如果自己有权限，或者子菜单有权限 → 保留
       if (  (r.meta?.title && selfHasAccess) || children.length > 0) {
         return {
           fullPath: fullPath,
-          path: r.meta?.path,
+          path: r.path,
           title: r.meta?.title,
           icon: r.meta?.icon,
           children
@@ -46,9 +46,10 @@ export function collectPathsFromRoles(roles = []) {
 
 
 export function findBreadcrumb(menuList, path, trail = []) {
+  console.log('findBreadcrumb',menuList, path, trail)
   for (const menu of menuList) {
     const newTrail = [...trail, { name: menu.title, path: menu.path }]
-    if (menu.path === path) return newTrail
+    if (menu.fullPath === path) return newTrail
     if (menu.children?.length) {
       const childTrail = findBreadcrumb(menu.children, path, newTrail)
       if (childTrail.length) return childTrail

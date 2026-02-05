@@ -46,11 +46,12 @@ function toggleSidebar() {
 watch(
   () => userStore.user,
   (user) => {
+    if (!user) return  // 如果用户还没加载，就不处理
     const roles = user?.roles || [] 
     const paths = collectPathsFromRoles(roles)
     menus.value = generateMenuFromRoutes(routes, paths)
-    console.log('paths', paths)
-    console.log('menus', menus.value)
-  }
+    console.log(' routes, paths', routes, paths)
+  },
+  { immediate: true }
 )
 </script>

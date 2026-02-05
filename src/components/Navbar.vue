@@ -1,8 +1,6 @@
 <template>
     <div class="layout">
       <div class="main">
-        333
-        <Header />
         <el-breadcrumb separator="/">
           <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="index" :to="item.path">
             {{ item.name }}
@@ -16,11 +14,21 @@
   import { useRoute } from 'vue-router'
   import { findBreadcrumb } from '../utils/menu'
   const route = useRoute()
-  const activeMenu = ref(route.path)
-  const props = defineProps({
-    menus: Array
+  const props = defineProps({ menus: Array })
+
+  // 动态计算面包屑
+  // 面包屑 computed，只有 menus 有值才计算
+  const breadcrumbList = computed(() => {
+    if (!props.menus?.length || !route.path) return []
+    return findBreadcrumb(props.menus, route.path)
   })
-  const breadcrumbList = computed(() => findBreadcrumb(props.menus, route.path))
-  console.log('breadcrumbList',props.menus,route.path,breadcrumbList)
-  watch(() => route.path, (newPath) => activeMenu.value = newPath)
+  console.log('breadcrumbList',breadcrumbList.value)
+  // 打印调试
+  watch(
+  () => props.menus,
+  (menus) => {
+    console.log('menus 更新了:', menus)
+  },
+  { immediate: true }
+)
   </script>

@@ -8,6 +8,8 @@ import Login from '../views/user/Login.vue'
 import Register from '../views/user/Register.vue'
 import Product from '../views/product/Product.vue'
 import ProductDetail from '../views/product/ProductDetail.vue'
+import Note from '../views/note/Note.vue'
+import NoteDetail from '../views/note/NoteDetail.vue'
 import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
 
@@ -37,6 +39,13 @@ export const routes = [
     name: 'Product'
   },
   { path: '/product/:id', component: ProductDetail, name: 'ProductDetail' },
+  {
+    path: '/note',
+    component: Note,
+    meta: { title: '文章', icon: markRaw(HomeFilled), roles: ['admin', 'user'] },
+    name: 'Note'
+  },
+  { path: '/note/:id', component: NoteDetail, name: 'NoteDetail' },
   {
     path: '/management',
     name: 'Management',
@@ -105,7 +114,6 @@ router.beforeEach(async (to, from) => {
   if (whiteList.includes(to.path)) return true
   // 2️⃣ 获取用户信息（缓存或请求后端）
   await userStore.fetchCurrentUser()
-  userStore.getUser()
   // 3️⃣ 未登录 → 跳转登录页
   if (!userStore.user) {
     return '/login'

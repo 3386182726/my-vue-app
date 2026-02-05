@@ -28,7 +28,7 @@
   const userStore = useUserStore()
   userStore.getUser()
   const user =userStore.user
- user.avatar ='https://i.pravatar.cc/40'
+  user.avatar ='https://i.pravatar.cc/40'
   function goProfile() {
     router.push('/profile')
   }

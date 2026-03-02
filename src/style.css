@@ -120,3 +120,13 @@ html, body, #app {
 
 .el-header {--el-header-padding: 0 0px;}
 .data-table { display: flex; justify-content: flex-start; margin-bottom: 10px;}
+
+.note-detail {
+  width: 100%;       /* 或者固定宽度 */
+  overflow-x: auto;  /* 图片过宽时出现滚动条 */
+}
+.note-detail img {
+  max-width: 100%;   /* 容器宽度的最大值 */
+  height: auto;      /* 高度自适应，保持比例 */
+  display: block;    /* 防止行内元素产生空隙 */
+}

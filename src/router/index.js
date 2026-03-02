@@ -9,6 +9,7 @@ import Register from '../views/user/Register.vue'
 import Product from '../views/product/Product.vue'
 import ProductDetail from '../views/product/ProductDetail.vue'
 import Note from '../views/note/Note.vue'
+import NoteCategory from '../views/note/NoteCategory.vue'
 import NoteDetail from '../views/note/NoteDetail.vue'
 import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
@@ -40,10 +41,23 @@ export const routes = [
   },
   { path: '/product/:id', component: ProductDetail, name: 'ProductDetail' },
   {
-    path: '/note',
-    component: Note,
-    meta: { title: '文章', icon: markRaw(HomeFilled), roles: ['admin', 'user'] },
-    name: 'Note'
+    path: '/notes',
+    meta: { title: '文章', icon: markRaw(HomeFilled), roles: ['admin', 'user'], alwaysShow: true },
+    name: 'Notes',
+    children:[
+      {
+        path: 'note',
+        component: Note,
+        meta: { title: '文章',  roles: ['admin', 'user'] },
+        name: 'Note',
+      },
+      {
+        path: 'noteCategory',
+        component: NoteCategory,
+        meta: { title: '文章分类',roles: ['admin', 'user'] },
+        name: 'NoteCategory',
+      },
+    ]
   },
   { path: '/note/:id', component: NoteDetail, name: 'NoteDetail' },
   {

@@ -4,7 +4,6 @@ export const normalizePath = (base = '', path = '') =>
   path.startsWith('/') ? path : `${base}/${path}`.replace(/\/+/g, '/')
 
 export function generateMenuFromRoutes(routes = [], allowedPaths = [], basePath = '') {
-  console.log()
   return routes
     .map(r => {
       const fullPath = normalizePath(basePath, r.path)

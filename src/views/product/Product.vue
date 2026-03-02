@@ -154,12 +154,12 @@ import { mapProductImages } from '../../utils/imageHelper'
   const fetchCategories = async ()=>
   {
     const res = await api.get('/api/product/categories')
-    categories.value = res.data
+    categories.value = res.data?res.data:[]
     console.log(' categories.value ', categories.value )
   }
   function CategoriesFormatter(row,clumn)
   {
-    return categories.value.find(c => c.id === row.category)?.name || '未知';
+    return categories?.value.find(c => c.id === row.category)?.name || '未知';
   }
   const imgs = computed(() =>
     mapProductImages(form.value.imgs,'product')

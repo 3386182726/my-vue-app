@@ -10,9 +10,8 @@
         />
         <el-table-column label="操作" width="280">
           <template #default="scope">
-            <el-button size="small" @click="handleRowDblClick( scope.row)">详情</el-button>
             <el-button size="small" @click="openDialog('edit', scope.row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="removeProduct(scope.row.id)">删除</el-button>
+            <el-button size="small" type="danger" @click="removeNoteCategory(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -35,7 +34,7 @@
         </el-form>
         <template #footer>
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitProduct">保存</el-button>
+          <el-button type="primary" @click="submitNoteCategory">保存</el-button>
         </template>
       </el-dialog>
     </el-card>
@@ -49,7 +48,7 @@
   import { useRouter } from 'vue-router'
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  const products = reactive({
+  const noteCategories = reactive({
   items: [],
   total: 0
   })
@@ -58,14 +57,14 @@
   const dialogVisible = ref(false);
   const dialogTitle = ref('');
   const categories = ref([])
-  const form = ref({ id: null, name: '', category: '', price: 0 ,imgs:[]});
-  const fetchProducts = async () => {
+  const form = ref({ id: null, name: ''});
+  const fetchNoteCategories = async () => {
     // loading.value = true;
 
     try {
       const res = await api.get(`/api/note`);
-      products.items = res.data.items;
-      products.total =res.data.total
+      noteCategories.items = res.data.items;
+      noteCategories.total =res.data.total
       console.log('note',notes)
     } catch(err) {
       console.log('note3',err)
@@ -75,71 +74,38 @@
   
   const openDialog = (type, row = null) => {
     if (type === 'add') {
-      dialogTitle.value = '新增文章';
-      form.value = { id: null, name: '', category: '', price: 0 ,imgs:[]};
+      dialogTitle.value = '新增文章分类';
+      form.value = { id: null, name: ''};
     } else if (type === 'edit') {
-      dialogTitle.value = '编辑文章';
+      dialogTitle.value = '编辑文章分类';
       form.value = { ...row };
     }
     dialogVisible.value = true;
   };
   
-  const submitProduct= async()=>{
+  const submitNoteCategory= async()=>{
     console.log(' form.value', form.value)
     try {
-        const res = await api.post('/api/product', form.value)
-        ElMessage.success('保存文章成功');
+        const res = await api.post('/api/noteCategory', form.value)
+        ElMessage.success('保存文章分类成功');
         console.log('res.data',res.data)
       } catch (err) {
-        ElMessage.error('保存文章失败')
-        console.error('保存文章失败:', err)
+        ElMessage.error('保存文章分类失败')
+        console.error('保存文章分类失败:', err)
       }
       dialogVisible.value = false
-      fetchProducts()
+      fetchNoteCategories()
   }
     
-  const removeProduct = async (id) => {
-    await api.delete(`/api/product/${id}`);
-    ElMessage.error('删除文章成功')
-    fetchProducts();
+  const removeNoteCategory = async (id) => {
+    await api.delete(`/api/noteCategory/${id}`);
+    ElMessage.error('删除文章分类成功')
+    fetchNoteCategories();
   };
-  
-  const uploadImage = async (file) => {
-    console.log('file2',file.raw instanceof File) 
-    const formData = new FormData()
-    formData.append('file', file.raw)
 
-    const res = await api.post('/api/product/upload/',  formData)
-    console.log('res.data',res.data)
-    form.value.imgs.push(res.data.url)
-    console.log('form',form)
-  }
-  function handleRemove(file) {
-    // 删除原始数据
-    form.value.imgs = form.value.imgs.filter(img => img.name !== file.name)
-  }
-  const fetchCategories = async ()=>
-  {
-    const res = await api.get('/api/product/categories')
-    categories.value = res.data
-    console.log(' categories.value ', categories.value )
-  }
-  function CategoriesFormatter(row,clumn)
-  {
-    return categories.value.find(c => c.id === row.category)?.name || '未知';
-  }
-  const imgs = computed(() =>
-    mapProductImages(form.value.imgs,'product')
-  )
   const router = useRouter()
-  function handleRowDblClick(row) {
-    // row.category = 
-    // 跳转到详情页面，传 id
-    router.push({ name: 'ProductDetail',   params: { id: row.id } })
-  }
   onMounted(() => {
-    fetchProducts();
-    fetchCategories();
+    fetchNoteCategories();
   });
   </script>
   

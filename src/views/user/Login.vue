@@ -42,12 +42,11 @@
   </template>
   
   <script setup>
+  import { ElMessage }  from 'element-plus'
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import { ElMessage } from 'element-plus'
   import axios from 'axios'
   import tokenStore from '../../stores/tokenStore'
-
   const router = useRouter()
   
   // 表单数据
@@ -68,13 +67,21 @@
     const response = await axios.post('/api/user/login', form.value, {
       withCredentials: true // ⚠️ 关键！允许跨域时携带 cookie
     })
-    console.log('后端返回:', response.data)
-    // 如果后端设置了 Cookie，jwt需要拿 token
-    tokenStore.setToken(response.data.token)
-    // 登录成功后直接跳转
-    router.push('/').catch(err => console.log(err))
+      // 如果后端设置了 Cookie，jwt需要拿 token
+      tokenStore.setToken(response.data.token)
+      console.log('后端返回:', response.data)
+      // 登录成功后直接跳转
+      router.push('/').catch(err => console.log(err))
   } catch (err) {
-    console.error('登录失败:', err)
+    const status = err?.response?.status
+    if(status===401)
+    {
+        ElMessage.error('用户名或密码错误.')
+    }else
+    {
+      ElMessage.error('登录失败:'+err.message)
+    }
+
   }
 }
   

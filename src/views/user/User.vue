@@ -4,7 +4,7 @@
         <div class="data-table">
             <!-- 搜索框 -->
     <el-input
-      v-model="searchText"
+      v-model="query.searchText"
       placeholder="搜索用户名或邮箱"
       @keyup.enter.native="fetchUsers"
       style="width: 200px; margin-bottom: 10px"
@@ -13,10 +13,9 @@
     <el-button type="primary" @click="openCreateDialog">创建用户</el-button>
   </div>
       
-
     <!-- 用户表格 -->
     <el-table
-      :data="users.items"
+      :data="data.items"
       style="width: 100%"
       @sort-change="handleSortChange"
       :default-sort="{ prop: sortField, order: sortDesc ? 'descending' : 'ascending' }"
@@ -49,7 +48,7 @@
     <el-pagination
       v-model:current-page="page"
       v-model:page-size="pageSize"
-      :total="users.total"
+      :total="data.total"
       layout="total, prev, pager, next, sizes"
       @current-change="fetchUsers"
       @size-change="fetchUsers"
@@ -103,12 +102,12 @@ import axios from 'axios'
 import { ElMessage,ElMessageBox } from 'element-plus'
 import fetchRoles from '../../api/role'
 import api from '../../api/api';
+import { getList } from '../../api/list';
 
-const page = ref(1)
-const pageSize = ref(10)
-const searchText = ref('')
-const sortField = ref('UserName')
-const sortDesc = ref(false)
+const { query, data, loading, getList:fetchUsers } = getList('/api/user/all', {
+  sortField: 'UserName',sortDesc:false
+})
+
 const showDialog = ref(false)
 const form = ref({id: '' })
 const roleOptions =ref([])
@@ -118,29 +117,9 @@ const users = reactive({
   total: 0
 })
 
-// 获取用户列表
-const fetchUsers = async () => {
-  console.log(111);
-  const res = await api.get('/api/user/all', {
-    params: {
-      page: page.value,
-      pageSize: pageSize.value,
-      search: searchText.value,
-      sortField: sortField.value,
-      sortDesc: sortDesc.value
-    },
-    // withCredentials: true
-  })
-  console.log('res.data',res.data)
-  users.items = res.data.items
-  users.total = res.data.total
-}
-
 // 表格排序变化
 const handleSortChange = ({ prop, order }) => {
-  sortField.value = prop
-  sortDesc.value = order === 'descending'
-  fetchUsers()
+  fetchUsers({ sortField: prop,sortDesc:order === 'descending'})
 }
 const openCreateDialog = async () => {
   form.value = { id: '', userName: '' } // 空表示创建

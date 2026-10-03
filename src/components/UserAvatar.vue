@@ -1,5 +1,5 @@
 <template>
-    <el-header height="60px" class="app-header">
+    <el-header height="45px" class="app-header">
       <div class="logo">ZMK@WhyWqyZddLhCyWyj</div>
   
       <div class="header-right">

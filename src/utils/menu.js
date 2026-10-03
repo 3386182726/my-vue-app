@@ -45,9 +45,9 @@ export function collectPathsFromRoles(roles = []) {
 
 
 export function findBreadcrumb(menuList, path, trail = []) {
-  console.log('findBreadcrumb',menuList, path, trail)
+  console.log('findBreadcrumb',menuList, path)
   for (const menu of menuList) {
-    const newTrail = [...trail, { name: menu.title, path: menu.path }]
+    const newTrail = [...trail, { name: menu.title, path: menu.fullPath }]
     if (menu.fullPath === path) return newTrail
     if (menu.children?.length) {
       const childTrail = findBreadcrumb(menu.children, path, newTrail)

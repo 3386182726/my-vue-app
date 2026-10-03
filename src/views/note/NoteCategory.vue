@@ -3,7 +3,7 @@
       <div  class="data-table">
         <el-button type="primary" @click="openDialog('add')">新增文章分类</el-button>
   </div>
-      <el-table :data="products.items" @row-dblclick="handleRowDblClick" style="width: 100%" v-loading="loading">
+      <el-table :data="data.items" @row-dblclick="handleRowDblClick" style="width: 100%" v-loading="loading">
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="category" label="分类"
          :formatter="CategoriesFormatter"
@@ -18,10 +18,10 @@
   
           <!-- 分页控件 -->
     <el-pagination
-      :total="products.total"
+      :total="data.total"
       layout="total, prev, pager, next, sizes"
-      @current-change="fetchProducts"
-      @size-change="fetchProducts"
+      @current-change="fetchnoteCategories"
+      @size-change="fetchnoteCategories"
       style="margin-top: 10px"
     />
 
@@ -46,31 +46,16 @@
   import api from '../../api/api';
   import axios from 'axios';
   import { useRouter } from 'vue-router'
+  import { getList } from '../../api/list';
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  const noteCategories = reactive({
-  items: [],
-  total: 0
-  })
-  const loading = ref(false);
-  
+
   const dialogVisible = ref(false);
   const dialogTitle = ref('');
-  const categories = ref([])
   const form = ref({ id: null, name: ''});
-  const fetchNoteCategories = async () => {
-    // loading.value = true;
-
-    try {
-      const res = await api.get(`/api/note`);
-      noteCategories.items = res.data.items;
-      noteCategories.total =res.data.total
-      console.log('note',notes)
-    } catch(err) {
-      console.log('note3',err)
-      loading.value = false;
-    }
-  };
+  const { query, data, loading, getList:fetchNoteCategories } = getList('/api/note/noteCategory', {
+    sortField: ''
+  })
   
   const openDialog = (type, row = null) => {
     if (type === 'add') {
@@ -86,7 +71,7 @@
   const submitNoteCategory= async()=>{
     console.log(' form.value', form.value)
     try {
-        const res = await api.post('/api/noteCategory', form.value)
+        const res = await api.post('/api/note/noteCategory', form.value)
         ElMessage.success('保存文章分类成功');
         console.log('res.data',res.data)
       } catch (err) {
@@ -98,7 +83,7 @@
   }
     
   const removeNoteCategory = async (id) => {
-    await api.delete(`/api/noteCategory/${id}`);
+    await api.delete(`/api/note/noteCategory/${id}`);
     ElMessage.error('删除文章分类成功')
     fetchNoteCategories();
   };

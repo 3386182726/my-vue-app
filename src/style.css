@@ -61,7 +61,6 @@ button:focus-visible {
 #app {
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
 @media (prefers-color-scheme: light) {
@@ -130,3 +129,32 @@ html, body, #app {
   height: auto;      /* 高度自适应，保持比例 */
   display: block;    /* 防止行内元素产生空隙 */
 }
+
+.w-e-text-container [contenteditable] {
+  font-size: 16px;
+}
+/* 1. 针对代码块容器 (pre 标签) */
+.w-e-text-container pre {
+  font-size: 16px !important; /* 修改这里：默认通常是 12px 或 13px */
+  line-height: 1.5 !important; /* 代码行高建议稍大，方便阅读 */
+}
+
+/* 2. 针对代码内容 (code 标签) - 双重保险 */
+.w-e-text-container pre code {
+  font-size: 16px !important;
+  background-color:aliceblue;
+  display: block;
+  padding: 8px 12px;          /* 内边距，文字不贴边 */
+  border-radius: 4px;         /* 圆角，让背景更柔和 */
+  line-height: 1.5;           /* 行高，让文字更易读 */
+  white-space: pre-wrap;      /* 自动换行，不溢出 */
+  word-break: break-word;     /* 遇到长单词换行 */
+  font-family: "Consolas", "Monaco", "Courier New", monospace !important;
+}
+.note-header,
+.note-header input {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: monospace;
+}
+.el-header { position: relative; z-index: 1; }

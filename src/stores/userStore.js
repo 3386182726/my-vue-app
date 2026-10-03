@@ -12,26 +12,26 @@ export const useUserStore = defineStore('user', {
       // 安全地从 localStorage 读取用户信息
       try {
         console.log('getUser1')
-        const userData = localStorage.getItem('user')
+        const userData = sessionStorage.getItem('user')
         console.log('getUser2',userData)
         if (userData) {
           this.user = JSON.parse(userData)
         }
       } catch (error) {
-        console.error('Failed to parse user data from localStorage:', error)
-        localStorage.removeItem('user') // 清除无效数据
+        console.error('Failed to parse user data from sessionStorage:', error)
+        sessionStorage.removeItem('user') // 清除无效数据
       }
     },
     setUser(data) {
       this.user = data
-      localStorage.setItem('user', JSON.stringify(data))
-      const userData = localStorage.getItem('user')
+      sessionStorage.setItem('user', JSON.stringify(data))
+      const userData = sessionStorage.getItem('user')
       console.log('userData1',userData)
     },
     clearUser() {
       this.user = null
       userPromise =null
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
     },
     // 获取当前用户信息
     async fetchCurrentUser() {

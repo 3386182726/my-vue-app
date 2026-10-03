@@ -13,7 +13,7 @@ import NoteCategory from '../views/note/NoteCategory.vue'
 import NoteDetail from '../views/note/NoteDetail.vue'
 import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
-
+import tokenStore from '../stores/tokenStore'
 import { HomeFilled, Setting } from '@element-plus/icons-vue';
 
 export const routes = [
@@ -34,10 +34,17 @@ export const routes = [
     name: 'Dashboard'
   },
   {
-    path: '/product',
-    component: Product,
+    path: '/products',
     meta: { title: '产品', icon: markRaw(HomeFilled), roles: ['admin', 'user'] },
-    name: 'Product'
+    name: 'Products',
+    children:[
+      {
+        path: 'product',
+        component: Product,
+        meta: { title: '产品发布',  roles: ['admin', 'user'] },
+        name: 'Product',
+      }
+    ]
   },
   { path: '/product/:id', component: ProductDetail, name: 'ProductDetail' },
   {
@@ -123,11 +130,17 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const whiteList = ['/login', '/register']
   const userStore = useUserStore()
-
+  const token = tokenStore.getToken()
   // 1️⃣ 白名单直接放行
   if (whiteList.includes(to.path)) return true
+  // 1️⃣ 没有 token → 登录
+  if (!token) {
+    return '/login'
+  }
   // 2️⃣ 获取用户信息（缓存或请求后端）
-  await userStore.fetchCurrentUser()
+  if (!userStore.user) {
+    await userStore.fetchCurrentUser()
+  }
   // 3️⃣ 未登录 → 跳转登录页
   if (!userStore.user) {
     return '/login'

@@ -3,7 +3,6 @@
     <el-card class="box-card">
       <template #header>
         <div class="card-header">
-        <span> 商品详情</span>
           <el-button type="primary" link @click="goBack">返回列表</el-button>
         </div>
       </template>

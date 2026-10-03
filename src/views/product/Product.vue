@@ -2,6 +2,7 @@
     <el-card class="product-page">
       <div  class="data-table">
         <el-button type="primary" @click="openDialog('add')">新增产品</el-button>
+        <el-button type="primary" @click="fetchCategories()">搜索</el-button>
   </div>
       <el-table :data="products.items" @row-dblclick="handleRowDblClick" style="width: 100%" v-loading="loading">
         <el-table-column prop="name" label="名称" />
@@ -14,6 +15,7 @@
           <template #default="scope">
             <el-button size="small" @click="handleRowDblClick( scope.row)">详情</el-button>
             <el-button size="small" @click="openDialog('edit', scope.row)">编辑</el-button>
+            <el-button size="small" @click="Seckill( scope.row)">秒杀</el-button>
             <el-button size="small" type="danger" @click="removeProduct(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -77,8 +79,8 @@
   import api from '../../api/api';
   import axios from 'axios';
   import { useRouter } from 'vue-router'
-import { mapProductImages } from '../../utils/imageHelper'
-
+  import { mapProductImages } from '../../utils/imageHelper'
+ 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL 
   const products = reactive({
   items: [],
@@ -91,12 +93,13 @@ import { mapProductImages } from '../../utils/imageHelper'
   const categories = ref([])
   const form = ref({ id: null, name: '', category: '', price: 0 ,imgs:[]});
   const fetchProducts = async () => {
-    // loading.value = true;
-
+    loading.value = true;
+    await new Promise(r => setTimeout(r, 600));
     try {
       const res = await api.get(`/api/product`);
       products.items = res.data.items;
       products.total =res.data.total
+      loading.value = false;
       console.log('products',products)
     } catch(err) {
       console.log('fetchProducts3',err)
@@ -130,7 +133,30 @@ import { mapProductImages } from '../../utils/imageHelper'
       dialogVisible.value = false
       fetchProducts()
   }
-    
+  const Seckill = async (row) => {
+    loading.value = true;
+  console.log('productrow',row)
+  const requests = []
+  for (let i = 0; i < 100; i++) {
+    requests.push(
+      api.post(`/api/product/${row.id}/Seckill`)
+    )
+  }
+  const results = await Promise.allSettled(requests)
+  loading.value = false;
+  console.log('results',results)
+  const successCount = results.filter(
+  x => x.status === 'fulfilled' && x.value.data.success === true
+).length
+
+const failCount = results.filter(
+  x => x.status === 'rejected' || x.value?.data?.success === false
+).length
+  ElMessage.success(
+    `测试完成：成功 ${successCount}，失败 ${failCount}`
+  )
+  fetchProducts()
+}
   const removeProduct = async (id) => {
     await api.delete(`/api/product/${id}`);
     ElMessage.error('删除产品成功')

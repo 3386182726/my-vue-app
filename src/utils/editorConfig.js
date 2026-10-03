@@ -1,6 +1,6 @@
 export function editorConfig(baseUrl) {
     return {
-      placeholder: '请输入内容...',
+      placeholder: '',
       MENU_CONF: {
         uploadImage: {
           server: baseUrl + 'api/note/upload/',

@@ -9,10 +9,9 @@
 
     <!-- 右侧内容 -->
     <el-container>
-      <el-header height="60px">
+      <el-header >
         <UserInfo></UserInfo>
         <Navbar :menus="menus" @toggleSidebar="toggleSidebar" />
-  
       </el-header>
 
       <el-main>
@@ -50,7 +49,7 @@ watch(
     const roles = user?.roles || [] 
     const paths = collectPathsFromRoles(roles)
     menus.value = generateMenuFromRoutes(routes, paths)
-    console.log(' routes, paths', routes, paths)
+    console.log(' routes, paths', routes, paths,  menus.value)
   },
   { immediate: true }
 )

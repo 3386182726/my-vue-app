@@ -7,13 +7,16 @@ api.interceptors.request.use(config => {
   if (tokenStore.getToken()) {
     config.headers['Authorization'] = `Bearer ${tokenStore.getToken()}`;
   }
+  console.log('tokenStore.getToken()',tokenStore.getToken())
   return config;
 });
 
 api.interceptors.response.use(response => response, error => {
-  if (error.response?.status === 401) {
+  const status = error.response?.status
+  const originalRequest = error.config
+  if (status === 401 && !originalRequest.url.includes('/login')) {
     tokenStore.removeToken()
-    window.location.href = '/login';  // 跳转登录
+    router.push('/login')  // 跳转登录
   }
   return Promise.reject(error);
 });

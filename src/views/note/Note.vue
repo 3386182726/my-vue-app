@@ -3,14 +3,16 @@
       <div  class="data-table">
         <el-button type="primary" @click="openDialog('add')">新增文章</el-button>
   </div>
-      <el-table :data="notes.items" @row-dblclick="handleRowDblClick" style="width: 100%" v-loading="loading">
-        <el-table-column prop="name" show-overflow-tooltip label="名称" />
-        <el-table-column prop="category" label="分类"
-         :formatter="CategoriesFormatter"
-        />
-        <el-table-column prop="createdAt" :formatter="createdAtFormatter" label="创建时间" />
-        <el-table-column prop="createrName" label="创建人" />
-        <el-table-column label="操作" width="280">
+      <el-table :data="data.items" @row-dblclick="handleRowDblClick" style="width: 100%" v-loading="loading">
+        <el-table-column show-overflow-tooltip label="名称" min-width="320"  >
+          <template #default="{ row }">
+            <span style="font-size:16px;font-family:monospace;font-weight: 600;">{{ row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="categoryName" label="分类" min-width="60"/>
+        <el-table-column prop="createdAt" :formatter="createdAtFormatter" label="创建时间" min-width="60" />
+        <el-table-column prop="createrName" label="创建人" min-width="60" />
+        <el-table-column label="操作" min-width="100">
           <template #default="scope">
             <el-button size="small" @click="handleRowDblClick( scope.row)">详情</el-button>
             <el-button size="small" @click="openDialog('edit', scope.row)">编辑</el-button>
@@ -21,7 +23,9 @@
   
           <!-- 分页控件 -->
     <el-pagination
-      :total="notes.total"
+      v-model:current-page="query.page"
+      v-model:page-size="query.pageSize"
+      :total="data.total"
       layout="total, prev, pager, next, sizes"
       @current-change="fetchNotes"
       @size-change="fetchNotes"
@@ -32,10 +36,10 @@
       <el-dialog :title="dialogTitle" v-model="dialogVisible">
         <el-form :model="form">
           <el-form-item label="名称" >
-            <el-input v-model="form.name" />
+         <el-input v-model="form.name" class="note-header"/>
           </el-form-item>
           <el-form-item label="分类">
-            <el-select v-model="form.category" placeholder="请选择分类">
+            <el-select v-model="form.categoryId" placeholder="请选择分类">
               <el-option
                 v-for="c in categories"
                 :key="c.id"
@@ -58,6 +62,7 @@
                 :defaultConfig="config"
                 :mode="mode"
                 @onCreated="handleCreated"
+                @onFocus="handleFocus"
             />
             </div>
         </el-form-item>
@@ -74,7 +79,7 @@
   import { ElMessage,ElMessageBox } from 'element-plus'
   import api from '../../api/api';
   import axios from 'axios';
-  import { useRouter } from 'vue-router'
+  import { useRouter ,useRoute} from 'vue-router'
 import { editorConfig  } from '../../utils/editorConfig'
 import dayjs from 'dayjs';
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -82,6 +87,9 @@ import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import { onBeforeUnmount, ref, shallowRef, onMounted , reactive,computed} from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 
+import { getList } from '../../api/list';
+
+const route = useRoute()
 // 注册组件（在 <script setup> 中用 defineComponent 或直接 import 后自动可用）
 const components = { Editor, Toolbar } // 可选，如果你在模板里直接用 Editor/Toolbar，也可以不写
 const baseUrl = import.meta.env.VITE_API_BASE_URL
@@ -106,16 +114,12 @@ onBeforeUnmount(() => {
 const handleCreated = (editor) => {
   editorRef.value = editor // 记录 editor 实例
 }
-
+const handleFocus=(editor) => {
+  editor.addMark('fontFamily','仿宋');
+  editor.addMark('fontSize','16px');
+}
 // 模板里直接使用 editorRef、valueHtml、toolbarConfig、editorConfig、handleCreated
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL 
-  const notes = reactive({
-  items: [],
-  total: 0
-  })
-  const loading = ref(false);
-  
   const dialogVisible = ref(false);
   const dialogTitle = ref('');
   const categories = ref([])
@@ -123,24 +127,16 @@ const handleCreated = (editor) => {
   id: null,
   name: '',
   content: '',
-  category: null
+  categoryId: null
 })
 
 const form = ref(createDefaultForm())
-  const fetchNotes = async () => {
-    // loading.value = true;
+const page = ref(1) 
 
-    try {
-      const res = await api.get(`/api/note`);
-      notes.items = res.data.items;
-      notes.total =res.data.total
-      console.log('note',notes)
-    } catch(err) {
-      console.log('note3',err)
-      loading.value = false;
-    }
-  };
-  
+const { query, data, loading, getList:fetchNotes } = getList('/api/note', {
+  sortField: ''
+})
+
   const openDialog = (type, row = null) => {
     if (type === 'add') {
       form.value = createDefaultForm()
@@ -174,14 +170,9 @@ const form = ref(createDefaultForm())
   
   const fetchCategories = async ()=>
   {
-    const res = await api.get('/api/note/categories')
+    const res = await api.get('/api/note/noteCategory/all')
     categories.value = res.data?res.data:[]
     console.log(' categories.value ', categories.value )
-  }
-  function CategoriesFormatter(row,clumn)
-  {
-    console.log('categories?.value',categories?.value)
-    return categories?.value.find(c => c.id === row.category)?.name || '未知';
   }
   function createdAtFormatter(row)
   {
@@ -191,9 +182,12 @@ const form = ref(createDefaultForm())
   function handleRowDblClick(row) {
     // row.category = 
     // 跳转到详情页面，传 id
-    router.push({ name: 'NoteDetail',   params: { id: row.id } })
+    router.push({ name: 'NoteDetail',   params: { id: row.id } ,query: { page: query.page }} )
   }
   onMounted(() => {
+    page.value = Number(route.query.page) || 1
+    console.log('page.value',page.value)
+    query.page = page.value  
     fetchNotes();
     fetchCategories();
   });

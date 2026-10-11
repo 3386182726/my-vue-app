@@ -1,10 +1,11 @@
-// utils/menu.js
+// utils/routeMenu.js
 
 export const normalizePath = (base = '', path = '') =>
   path.startsWith('/') ? path : `${base}/${path}`.replace(/\/+/g, '/')
 
 export function generateMenuFromRoutes(routes = [], allowedPaths = [], basePath = '') {
   return routes
+    .filter(r => !r.meta?.hidden) // 详情页等不进菜单的路由
     .map(r => {
       const fullPath = normalizePath(basePath, r.path)
 
@@ -13,9 +14,11 @@ export function generateMenuFromRoutes(routes = [], allowedPaths = [], basePath 
         ? generateMenuFromRoutes(r.children, allowedPaths, fullPath)
         : []
 
-      // 判断当前菜单是否有权限
+      // 判断当前菜单是否有权限（alwaysShow 标记的路由不依赖后端菜单权限）
       const selfHasAccess =
-      allowedPaths.includes(fullPath) || allowedPaths.includes(r.path.replace('/',''))
+        r.meta?.alwaysShow ||
+        allowedPaths.includes(fullPath) ||
+        allowedPaths.includes(r.path.replace('/',''))
       // console.log('selfHasAccess',r.path,allowedPaths,allowedPaths.includes(r.path))
       // 如果自己有权限，或者子菜单有权限 → 保留
       if (  (r.meta?.title && selfHasAccess) || children.length > 0) {
@@ -41,18 +44,4 @@ export function collectPathsFromRoles(roles = []) {
     })
   })
   return Array.from(pathSet)
-}
-
-
-export function findBreadcrumb(menuList, path, trail = []) {
-  console.log('findBreadcrumb',menuList, path)
-  for (const menu of menuList) {
-    const newTrail = [...trail, { name: menu.title, path: menu.fullPath }]
-    if (menu.fullPath === path) return newTrail
-    if (menu.children?.length) {
-      const childTrail = findBreadcrumb(menu.children, path, newTrail)
-      if (childTrail.length) return childTrail
-    }
-  }
-  return []
 }

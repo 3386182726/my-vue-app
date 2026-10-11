@@ -1,9 +1,9 @@
 import { markRaw } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
-import About from '../views/About.vue'
-import Settings from '../views/Settings.vue'
-import News from '../views/News.vue'
+import About from '../views/system/About.vue'
+import Settings from '../views/system/Settings.vue'
+import News from '../views/system/News.vue'
 import Login from '../views/user/Login.vue'
 import Register from '../views/user/Register.vue'
 import Product from '../views/product/Product.vue'
@@ -11,9 +11,8 @@ import ProductDetail from '../views/product/ProductDetail.vue'
 import Note from '../views/note/Note.vue'
 import NoteCategory from '../views/note/NoteCategory.vue'
 import NoteDetail from '../views/note/NoteDetail.vue'
-import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
-import tokenStore from '../stores/tokenStore'
+import tokenStore from '../utils/auth'
 import { HomeFilled, Setting } from '@element-plus/icons-vue';
 
 export const routes = [
@@ -43,10 +42,16 @@ export const routes = [
         component: Product,
         meta: { title: '产品发布',  roles: ['admin', 'user'] },
         name: 'Product',
+      },
+      {
+        // 绝对路径子路由：URL 仍为 /product/:id，同时在 matched 中保留父级层级
+        path: '/product/:id',
+        component: ProductDetail,
+        name: 'ProductDetail',
+        meta: { title: '产品详情', hidden: true }
       }
     ]
   },
-  { path: '/product/:id', component: ProductDetail, name: 'ProductDetail' },
   {
     path: '/notes',
     meta: { title: '文章', icon: markRaw(HomeFilled), roles: ['admin', 'user'], alwaysShow: true },
@@ -64,9 +69,15 @@ export const routes = [
         meta: { title: '文章分类',roles: ['admin', 'user'] },
         name: 'NoteCategory',
       },
+      {
+        // 绝对路径子路由：URL 仍为 /note/:id，同时在 matched 中保留父级层级
+        path: '/note/:id',
+        component: NoteDetail,
+        name: 'NoteDetail',
+        meta: { title: '文章详情', hidden: true }
+      }
     ]
   },
-  { path: '/note/:id', component: NoteDetail, name: 'NoteDetail' },
   {
     path: '/management',
     name: 'Management',
@@ -77,7 +88,7 @@ export const routes = [
         name: 'User',
         component: () => import('../views/user/User.vue'),
         meta: {
-          title: '用户', roles: ['Admin'] // 只有 Admin 能访问
+          title: '用户', roles: ['admin']
         }
       },
       {
@@ -85,7 +96,7 @@ export const routes = [
         name: 'Role',
         component: () => import('../views/role/Role.vue'),
         meta: {
-          title: '角色', roles: ['Admin'] // 只有 Admin 能访问
+          title: '角色', roles: ['admin']
         }
       },
       {
@@ -93,7 +104,7 @@ export const routes = [
         name: 'Menu',
         component: () => import('../views/menu/Menu.vue'),
         meta: {
-          title: '菜单', roles: ['Admin'] // 只有 Admin 能访问
+          title: '菜单', roles: ['admin']
         }
       },
       {
@@ -106,8 +117,15 @@ export const routes = [
         path: 'settings',
         component: Settings,
         name: 'Settings',
+        redirect: '/management/settings/background',
         meta: { title: '设置', roles: ['admin'] },
         children: [
+          {
+            path: 'background',
+            name: 'BackgroundSetting',
+            component: () => import('../views/system/BackgroundSetting.vue'),
+            meta: { title: '背景图', roles: ['admin'], alwaysShow: true }
+          },
           {
             path: 'news',
             component: News,

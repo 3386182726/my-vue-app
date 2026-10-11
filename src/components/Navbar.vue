@@ -1,34 +1,31 @@
 <template>
-      <div>
-        <el-breadcrumb separator="/" router>
-          <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="index"  :to="{ path: item.path }">
-            {{ item.name }}
-          </el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
-  </template>
-  <script setup>
-  import { ref, computed, watch,defineProps  } from 'vue'
-  import { useRoute } from 'vue-router'
-  import { findBreadcrumb } from '../utils/menu'
-  const route = useRoute()
-  const props = defineProps({ menus: Array })
+  <el-breadcrumb separator="/" router class="navbar">
+    <el-breadcrumb-item
+      v-for="(item, index) in breadcrumbList"
+      :key="item.path"
+      :to="index === breadcrumbList.length - 1 ? undefined : { path: item.path }"
+    >
+      {{ item.name }}
+    </el-breadcrumb-item>
+  </el-breadcrumb>
+</template>
 
-  // 动态计算面包屑
-  // 面包屑 computed，只有 menus 有值才计算
-  const breadcrumbList = computed(() => {
-    if (!props.menus?.length || !route.path) return []
-    return findBreadcrumb(props.menus,route.path)
-  })
-  // 打印调试
-  watch(
-    () => props.menus,
-    (menus) => {
-      console.log('menus 更新了:', menus)
-    },
-    { immediate: true }
-  )
-  watch(breadcrumbList, (val) => {
-    console.log('breadcrumbList 更新:', val)
-  }, { immediate: true })
-  </script>
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 直接取路由匹配链：matched 天然是从根到当前页的层级
+const breadcrumbList = computed(() =>
+  route.matched
+    .filter(r => r.meta?.title)
+    .map(r => ({ name: r.meta.title, path: r.path }))
+)
+</script>
+
+<style scoped>
+.navbar {
+  padding: 6px 20px 0;
+}
+</style>

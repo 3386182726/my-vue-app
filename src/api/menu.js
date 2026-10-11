@@ -1,15 +1,17 @@
-import axios from 'axios'
-import api from './api'
+import request from './request'
 
+// 接口路径常量
+const MENU_API = '/api/user/menu'
+
+// 全部菜单（树形，返回解包后的 data）
 export const fetchMenus = async () => {
-    try {
-      const res = await api.get('/api/user/menu/all', { withCredentials: true })
-      console.log('menu.res.data',res.data)
-      return res.data
-    } catch (err) {
-      console.error('获取菜单失败:', err)
-      throw err 
-    }
-  }
+  const res = await request.get(`${MENU_API}/all`, { withCredentials: true })
+  console.log('menu.res.data', res.data)
+  return res.data
+}
 
-  export default fetchMenus
+// 新增/修改菜单
+export const saveMenu = (data) =>
+  request.post(`${MENU_API}/save`, data, { withCredentials: true })
+
+export default fetchMenus

@@ -6,20 +6,17 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import './style.css'
 import router from './router'
-import axios from 'axios'
 import { createPinia } from 'pinia'
-
-// 后端地址（开发环境常见）
-// axios.defaults.baseURL = 'https://localhost:7207/'
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-axios.defaults.baseURL = BASE_URL
-// axios.defaults.baseURL = 'http://localhost:8080/'
-// 如果用 cookie 认证，还需要带上这一句
-// axios.defaults.withCredentials = true
-export default axios
 
 const pinia = createPinia()
 const app = createApp(App)
+
+// 过滤 element-plus 表格插槽的无害警告（详见 el-table 已知问题）
+app.config.warnHandler = (msg, instance, trace) => {
+  if (msg.includes('invoked outside of the render function')) return
+  console.warn(msg, trace)
+}
+
 app.use(ElementPlus)
 app.use(router)
 app.use(pinia)

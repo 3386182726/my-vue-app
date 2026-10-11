@@ -1,18 +1,18 @@
-// api/list.js
-import api from './api' // axios 实例
+// composables/useList.js
 import { reactive, ref } from 'vue'
 
 /**
- * api.getList(url, initialQuery)
- * @param {string} url 接口地址
+ * useList(fetcher, initialQuery)
+ * @param {(params: object) => Promise} fetcher 列表请求函数（由 api 模块提供），接收组装好的查询参数
  * @param {object} initialQuery 可选初始参数
- * @returns {object} { query, data, total, loading, getList, resetQuery }
+ * @returns {object} { query, data, total, loading, fetch, resetQuery }
  */
-export function getList(url, initialQuery = {}) {
+export function useList(fetcher, initialQuery = {}) {
   const query = reactive({
     page: 1,
     pageSize: 10,
     searchText: '',
+    conditions: {},
     sortField: '',
     sortDesc: false,
     ...initialQuery
@@ -25,7 +25,7 @@ export function getList(url, initialQuery = {}) {
 
   const loading = ref(false)
 
-  const getList = async (extraParams = {}) => {
+  const fetch = async (extraParams = {}) => {
     loading.value = true
     try {
       const params = {
@@ -34,10 +34,11 @@ export function getList(url, initialQuery = {}) {
         search: query.searchText,
         sortField: query.sortField,
         sortDesc: query.sortDesc,
+        conditions: query.conditions,
         ...extraParams
       }
 
-      const res = await api.get(url, { params })
+      const res = await fetcher(params)
 
       data.items = res.data.items
       data.total = res.data.total
@@ -58,7 +59,7 @@ export function getList(url, initialQuery = {}) {
     query,
     data,
     loading,
-    getList,
+    fetch,
     resetQuery
   }
 }

@@ -6,7 +6,7 @@
     <el-input
       v-model="query.searchText"
       placeholder="搜索用户名或邮箱"
-      @keyup.enter.native="fetchUsers"
+      @keyup.enter="fetchUsers"
       style="width: 200px; margin-bottom: 10px"
     />
     <el-button type="primary" @click="fetchUsers">搜索</el-button>
@@ -46,8 +46,8 @@
 
     <!-- 分页控件 -->
     <el-pagination
-      v-model:current-page="page"
-      v-model:page-size="pageSize"
+      v-model:current-page="query.page"
+      v-model:page-size="query.pageSize"
       :total="data.total"
       layout="total, prev, pager, next, sizes"
       @current-change="fetchUsers"
@@ -97,25 +97,19 @@
   </template>
   
   <script setup>
-import { ref, reactive,onMounted, watch } from 'vue'
-import axios from 'axios'
+import { ref, onMounted, watch } from 'vue'
 import { ElMessage,ElMessageBox } from 'element-plus'
 import fetchRoles from '../../api/role'
-import api from '../../api/api';
-import { getList } from '../../api/list';
+import { fetchUsers as fetchUsersApi, saveUser, deleteUser as deleteUserApi } from '../../api/user';
+import { useList } from '../../composables/useList';
 
-const { query, data, loading, getList:fetchUsers } = getList('/api/user/all', {
+const { query, data, loading, fetch: fetchUsers } = useList(fetchUsersApi, {
   sortField: 'UserName',sortDesc:false
 })
 
 const showDialog = ref(false)
 const form = ref({id: '' })
 const roleOptions =ref([])
-
-const users = reactive({
-  items: [],
-  total: 0
-})
 
 // 表格排序变化
 const handleSortChange = ({ prop, order }) => {
@@ -133,7 +127,7 @@ const openEditDialog = async (row) => {
 }
 const submitUser= async()=>{
   try {
-      const res = await api.post('/api/user/create-user', form.value, { withCredentials: true })
+      const res = await saveUser(form.value)
       roleOptions.value = res.data
       ElMessage.success('创建用户成功');
       console.log('res.data',res.data)
@@ -159,7 +153,7 @@ const submitUser= async()=>{
     .then(async () => {
       try {
         // 调用删除接口
-        await api.delete(`/api/user/${user.id}`, { withCredentials: true })
+        await deleteUserApi(user.id)
         ElMessage.success('删除成功')
         fetchUsers() // 刷新列表
       } catch (err) {

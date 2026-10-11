@@ -45,8 +45,8 @@
   import { ElMessage }  from 'element-plus'
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import axios from 'axios'
-  import tokenStore from '../../stores/tokenStore'
+  import { login as loginApi } from '../../api/user'
+  import tokenStore from '../../utils/auth'
   const router = useRouter()
   
   // 表单数据
@@ -64,9 +64,7 @@
   // 点击登录
   const login = async () => {
   try {
-    const response = await axios.post('/api/user/login', form.value, {
-      withCredentials: true // ⚠️ 关键！允许跨域时携带 cookie
-    })
+    const response = await loginApi(form.value)
       // 如果后端设置了 Cookie，jwt需要拿 token
       tokenStore.setToken(response.data.token)
       console.log('后端返回:', response.data)

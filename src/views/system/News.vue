@@ -4,6 +4,6 @@
       <el-button type="warning">查看新闻</el-button>
     </div>
   </template>
-  
+
   <script setup>
   </script>

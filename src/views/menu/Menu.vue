@@ -49,9 +49,7 @@
   
   <script setup>
   import { ref ,onMounted} from 'vue'
-    import axios from 'axios'
-    import fetchMenus from '../../api/menu'
-    import api from '../../api/api';
+    import { fetchMenus, saveMenu as saveMenuApi } from '../../api/menu'
     const menuList = ref([])
   
   const dialogVisible = ref(false)
@@ -85,7 +83,7 @@
 
   const saveMenu = async () => {
     try {
-      await api.post(`/api/user/menu/save`,  form.value, { withCredentials: true })
+      await saveMenuApi(form.value)
       form.value = { id: '', name: '' }
       dialogVisible.value = false
       console.log('menu1')

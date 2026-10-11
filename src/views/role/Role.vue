@@ -33,7 +33,7 @@
       </el-dialog>
 
        <!-- 菜单分配对话框 -->
-  <el-dialog v-model="showDialog2" title="分配菜单" @close="resetDialog">
+  <el-dialog v-model="showAssignMenuDialog" title="分配菜单" @close="resetDialog">
     <!-- 使用 el-tree 组件展示树形结构 -->
     <el-tree
     ref="tree"
@@ -48,7 +48,7 @@
     <template #footer>
     <div class="dialog-footer">
       <el-button @click="assignMenu">保存</el-button>
-      <el-button @click="showDialog2 = false">取消</el-button>
+      <el-button @click="showAssignMenuDialog = false">取消</el-button>
       </div>
     </template>
   </el-dialog>
@@ -58,15 +58,19 @@
   
   <script setup>
   import { ref, onMounted   } from 'vue'
-  import axios from 'axios'
   import { ElMessage , ElMessageBox } from 'element-plus'
-    import fetchMenus from '../../api/menu'
-    import api from '../../api/api';
+    import {
+      fetchRolesWithMenus as fetchRolesWithMenusApi,
+      saveRole,
+      deleteRole as deleteRoleApi,
+      assignRoleMenus
+    } from '../../api/role'
+    import { fetchMenus } from '../../api/menu'
 
   const roles = ref([])
   const showDialog = ref(false)
   const form = ref({id: '',  name: '' })
-  const showDialog2 = ref(false) 
+  const showAssignMenuDialog = ref(false) 
   const selectedMenuIds = ref([]) // 保存已选中的菜单ID
   const menuList = ref([])
   const treeProps = ref({
@@ -79,7 +83,7 @@ const selectedRow = ref(null);
   const fetchRolesWithMenus = async () => {
     console.log('1111')
     try {
-      const res = await api.get('/api/user/role/all/menus', { withCredentials: true })
+      const res = await fetchRolesWithMenusApi()
       roles.value = res.data
       console.log('roles.value',roles.value)
     } catch (err) {
@@ -98,7 +102,7 @@ const openEditDialog = (row) => {
   const submitRole  = async () => {
     if (!form.value.name) return
     try {
-      await api.post(`/api/user/role/save`,  form.value, { withCredentials: true })
+      await saveRole(form.value)
       form.value = { id: '', name: '' }
       showDialog.value = false
       fetchRolesWithMenus() // 刷新列表
@@ -121,7 +125,7 @@ const openEditDialog = (row) => {
     .then(async () => {
       try {
         // 调用删除接口
-        await api.delete(`/api/user/role/${role.id}`, { withCredentials: true })
+        await deleteRoleApi(role.id)
         ElMessage.success('删除成功')
         fetchRolesWithMenus() // 刷新列表
       } catch (err) {
@@ -142,7 +146,7 @@ const openAssignMenuDialog =async  (role) => {
   menuList.value =  await fetchMenus() 
   selectedMenuIds.value = role.menus.map(menu => String(menu.id)) || [] // 如果角色已有菜单分配，预选中
   console.log(' menuList.value ', menuList.value )
-  showDialog2.value = true
+  showAssignMenuDialog.value = true
 }
 
 // 保存分配的菜单
@@ -150,8 +154,8 @@ const assignMenu = async () => {
   var roleId =selectedRow.value.id
   console.log('selectedMenuIds.value',selectedMenuIds.value)
   try {
-    await api.post(`/api/user/role/${roleId}/menus`,   selectedMenuIds.value )
-    showDialog2.value = false
+    await assignRoleMenus(roleId, selectedMenuIds.value)
+    showAssignMenuDialog.value = false
     selectedRow.value =null
     ElMessage.success('分配菜单成功')
     fetchRolesWithMenus() // 重新加载角色和菜单

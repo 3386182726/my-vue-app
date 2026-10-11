@@ -51,7 +51,8 @@
   <script setup>
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-    import axios from 'axios'
+  import { ElMessage } from 'element-plus'
+  import { register } from '../../api/user'
     
   const router = useRouter()
   
@@ -89,9 +90,7 @@
     await registerForm.value.validate();
 
     // 调用注册接口
-    const response = await axios.post('/api/user/register', form.value, {
-      withCredentials: true // ⚠️ 允许跨域携带 cookie
-    });
+    const response = await register(form.value);
 
     // 注册成功提示 & 跳转
     ElMessage.success('注册成功，请登录');

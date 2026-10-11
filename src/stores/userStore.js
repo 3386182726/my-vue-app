@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
-import tokenStore from '../stores/tokenStore'
+import { fetchCurrentUser as fetchCurrentUserApi } from '../api/user'
 
 let userPromise = null
 export const useUserStore = defineStore('user', {
@@ -8,48 +7,46 @@ export const useUserStore = defineStore('user', {
     user: null
   }),
   actions: {
+    // 从内存或 sessionStorage 恢复用户信息，返回恢复结果
     getUser() {
-      // 安全地从 localStorage 读取用户信息
+      if (this.user) return this.user
       try {
-        console.log('getUser1')
         const userData = sessionStorage.getItem('user')
-        console.log('getUser2',userData)
         if (userData) {
           this.user = JSON.parse(userData)
         }
       } catch (error) {
-        console.error('Failed to parse user data from sessionStorage:', error)
+        console.error('解析本地用户信息失败:', error)
         sessionStorage.removeItem('user') // 清除无效数据
       }
+      return this.user
     },
     setUser(data) {
       this.user = data
       sessionStorage.setItem('user', JSON.stringify(data))
-      const userData = sessionStorage.getItem('user')
-      console.log('userData1',userData)
     },
     clearUser() {
       this.user = null
-      userPromise =null
-      sessionStorage.removeItem('user');
+      userPromise = null
+      sessionStorage.removeItem('user')
     },
-    // 获取当前用户信息
+    // 获取当前用户信息：内存/本地缓存命中则不发请求
     async fetchCurrentUser() {
-      if (this.user){
+      if (this.getUser()) {
         return this.user
-      } 
+      }
+      // 同步保存 Promise，并发调用复用同一请求
       if (!userPromise) {
-        userPromise = await axios.get('/api/user/me', 
-          {
-            headers: {
-            Authorization: `Bearer ${tokenStore.getToken()}`  // 添加 token
-            }
-          })
+        userPromise = fetchCurrentUserApi()
           .then(res => {
             this.setUser(res.data)
             return this.user
           })
-          .catch(() => {
+          .catch((err) => {
+            // 401 已由 request 拦截器统一处理（跳登录），其余错误打印便于排查
+            if (err.response?.status !== 401) {
+              console.error('获取用户信息失败:', err)
+            }
             this.user = null
             return null
           })

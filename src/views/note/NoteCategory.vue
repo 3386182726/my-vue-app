@@ -18,10 +18,12 @@
   
           <!-- 分页控件 -->
     <el-pagination
+      v-model:current-page="query.page"
+      v-model:page-size="query.pageSize"
       :total="data.total"
       layout="total, prev, pager, next, sizes"
-      @current-change="fetchnoteCategories"
-      @size-change="fetchnoteCategories"
+      @current-change="fetchNoteCategories"
+      @size-change="fetchNoteCategories"
       style="margin-top: 10px"
     />
 
@@ -43,17 +45,14 @@
   <script setup>
   import { ref, onMounted,reactive,computed } from 'vue';
   import { ElMessage,ElMessageBox } from 'element-plus'
-  import api from '../../api/api';
-  import axios from 'axios';
+  import { fetchNoteCategoryList, saveNoteCategory, deleteNoteCategory } from '../../api/note'
   import { useRouter } from 'vue-router'
-  import { getList } from '../../api/list';
-
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL 
+  import { useList } from '../../composables/useList';
 
   const dialogVisible = ref(false);
   const dialogTitle = ref('');
   const form = ref({ id: null, name: ''});
-  const { query, data, loading, getList:fetchNoteCategories } = getList('/api/note/noteCategory', {
+  const { query, data, loading, fetch: fetchNoteCategories } = useList(fetchNoteCategoryList, {
     sortField: ''
   })
   
@@ -71,7 +70,7 @@
   const submitNoteCategory= async()=>{
     console.log(' form.value', form.value)
     try {
-        const res = await api.post('/api/note/noteCategory', form.value)
+        const res = await saveNoteCategory(form.value)
         ElMessage.success('保存文章分类成功');
         console.log('res.data',res.data)
       } catch (err) {
@@ -83,7 +82,7 @@
   }
     
   const removeNoteCategory = async (id) => {
-    await api.delete(`/api/note/noteCategory/${id}`);
+    await deleteNoteCategory(id);
     ElMessage.error('删除文章分类成功')
     fetchNoteCategories();
   };

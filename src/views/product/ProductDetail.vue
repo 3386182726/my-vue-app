@@ -37,7 +37,7 @@
   <script setup>
 import { ref, onMounted ,computed} from 'vue'
 import { useRouter,useRoute } from 'vue-router'
-import api from '../../api/api';
+import { fetchProductById } from '../../api/product'
 import { mapProductImages } from '../../utils/imageHelper'
 
 const router = useRouter()
@@ -49,13 +49,12 @@ const product = ref({
   count: 0,
   imgs: []
 })
-const fetchProductById = async (id) => {
+const loadProduct = async (id) => {
     try {
-      const res = await api.get(`/api/product/${id}`);
+      const res = await fetchProductById(id);
       product.value = res.data;
     } catch(err) {
-      console.log('product2',err)
-      loading.value = false;
+      console.log('获取产品详情失败', err)
     }
   };
 const imgs = computed(() => mapProductImages(product.value.imgs, 'product'))
@@ -66,7 +65,7 @@ onMounted(async () => {
   // 从 router.state 获取对象
   const id = router.currentRoute.value.params.id
     if (id) {
-       await fetchProductById(id)
-    } 
+       await loadProduct(id)
+    }
 })
 </script>

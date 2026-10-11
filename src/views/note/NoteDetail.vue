@@ -26,7 +26,7 @@
 <script setup>
 import { ref, onMounted ,computed} from 'vue'
 import { useRouter,useRoute } from 'vue-router'
-import api from '../../api/api';
+import { fetchNoteById } from '../../api/note'
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 const router = useRouter()
 const route = useRoute()
@@ -38,26 +38,28 @@ const note = ref({
   createdAt: '',
   createrName: '',
 })
-const fetchNoteById = async (id) => {
+const loadNote = async (id) => {
     try {
-      const res = await api.get(`/api/note/${id}`);
+      const res = await fetchNoteById(id);
       note.value = res.data;
       console.log("note.value",note.value)
     } catch(err) {
-      console.log('note2',err)
-      loading.value = false;
+      console.log('获取文章详情失败',err)
     }
   };
 const goBack = () => {
   var page = Number(route.query.page) || 1
-  console.log('route.query.page',route.query.page)
-  router.push({ name: 'Note' ,query: { page }}) // 你的列表路由 name
+  var categoryId = route.query.categoryId
+  const query = { page }
+  if (categoryId) query.categoryId = categoryId
+  console.log('route.query', route.query.page,categoryId)
+  router.push({ name: 'Note', query }) // 你的列表路由 name
 }
 onMounted(async () => {
   // 从 router.state 获取对象
   const id = router.currentRoute.value.params.id
     if (id) {
-       await fetchNoteById(id)
-    } 
+       await loadNote(id)
+    }
 })
 </script>

@@ -158,12 +158,14 @@ onUnmounted(() => {
   height: 100vh;
 }
 
-/* 内容区为弹性容器，页面卡片撑满剩余高度，分页可贴底 */
-:deep(.el-main) {
+/* 内容区为弹性容器，仅主布局生效；登录/注册页有自己的 el-main，不受影响 */
+.layout :deep(.el-main) {
   display: flex;
   flex-direction: column;
 }
-:deep(.el-main > *) {
+/* 只让页面主体（唯一根元素；多卡片时的最后一张，如背景图库）撑满剩余高度，
+   避免把背景设置页顶部的外观卡片等辅助区块也拉高 */
+.layout :deep(.el-main > :last-child) {
   flex: 1;
   min-height: 0;
 }

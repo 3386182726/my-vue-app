@@ -177,6 +177,18 @@ onUnmounted(() => {
   background-repeat: var(--skin-bg-repeat);
   background-position: center;
   background-attachment: fixed;
+
+  /*
+   * 文字颜色跟随内容区透明度联动（始终保持深色，不翻白）：
+   * panelAlpha 高（卡片接近纯白）→ Element Plus 标准深灰色
+   * panelAlpha 低（卡片透、背景花哨）→ 在原色基础上继续加深、趋近纯黑以保证分量
+   * 四级文字色保持原有层次，整体同比例过渡
+   */
+  --skin-text-color: color-mix(in srgb, #303133 calc(var(--skin-panel-alpha) * 100%), #000000);
+  --el-text-color-primary: var(--skin-text-color);
+  --el-text-color-regular: color-mix(in srgb, #606266 calc(var(--skin-panel-alpha) * 100%), #1d1f22);
+  --el-text-color-secondary: color-mix(in srgb, #909399 calc(var(--skin-panel-alpha) * 100%), #4a4d52);
+  --el-text-color-placeholder: color-mix(in srgb, #a8abb2 calc(var(--skin-panel-alpha) * 100%), #6b6e75);
 }
 .layout.has-bg::before {
   content: '';
@@ -212,15 +224,19 @@ onUnmounted(() => {
 .layout.has-bg :deep(.el-header) {
   background: transparent;
 }
-/* logo 行：深色毛玻璃 */
+/* logo 行：深色毛玻璃；文字/图标颜色跟随内容区透明度联动 */
 .layout.has-bg :deep(.app-header) {
   background-color: rgba(30, 34, 40, var(--skin-bar-alpha));
   backdrop-filter: blur(var(--skin-blur));
   -webkit-backdrop-filter: blur(var(--skin-blur));
+  color: var(--skin-text-color);
 }
-/* 面包屑行：浅色毛玻璃 */
+.layout.has-bg :deep(.app-header .collapse-btn) {
+  color: var(--skin-text-color);
+}
+/* 面包屑行：浅色毛玻璃，不透明度与内容卡片一致 */
 .layout.has-bg :deep(.navbar) {
-  background-color: rgba(255, 255, 255, calc(var(--skin-panel-alpha) * 0.55));
+  background-color: rgba(255, 255, 255, var(--skin-panel-alpha));
   backdrop-filter: blur(var(--skin-blur));
   -webkit-backdrop-filter: blur(var(--skin-blur));
   padding-bottom: 6px;

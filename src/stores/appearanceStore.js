@@ -8,7 +8,7 @@ const SKIN_KEY = 'app_skin_settings'
 export const DEFAULT_SKIN = {
   panelAlpha: 0.45,   // 内容区（卡片/面包屑）白色不透明度
   controlAlpha: 0.45, // 控件（按钮/输入框/下拉/单选按钮）白色不透明度
-  barAlpha: 0.3,      // 侧栏/logo 行深色不透明度
+  barAlpha: 0.45,     // 侧栏/logo 行深色不透明度（初始与内容卡片一致）
   blur: 12,           // 毛玻璃模糊像素
   overlay: 0.25,      // 背景图整体压暗程度
   fit: 'cover'        // 填充模式：cover 填充 / contain 适应 / stretch 拉伸 / tile 平铺 / auto 原图
